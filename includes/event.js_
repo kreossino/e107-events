@@ -1,0 +1,51 @@
+//confirmation functions
+function event_Confirm_Param(strMsg, strParam)
+{
+	strMsg = strMsg.replace(/%s/, strParam);
+	
+	return (confirm(strMsg));
+}
+
+//Zeilen verstecken bei scheduler der Turniere
+function switchControls(obj)
+{
+    if (obj.selectedIndex==0)
+    {
+        document.getElementById("day").style.display="none";
+        document.getElementById("week").style.display="none";
+        document.getElementById("month").style.display="none";
+    }
+    else if (obj.selectedIndex==1)
+    {
+        document.getElementById("day").style.display="table-row";
+        document.getElementById("week").style.display="none";
+        document.getElementById("month").style.display="none";
+    }
+	else if (obj.selectedIndex==2)
+    {
+        document.getElementById("day").style.display="none";
+        document.getElementById("week").style.display="table-row";
+        document.getElementById("month").style.display="none";
+    }
+	else if (obj.selectedIndex==3)
+    {
+        document.getElementById("day").style.display="none";
+        document.getElementById("week").style.display="none";
+        document.getElementById("month").style.display="table-row";
+    }
+}
+
+// Checkboxen alle markieren
+function check_all(form_id, checkbox_id) {
+  var form = document.getElementById(form_id);
+  
+  for(i = 0; i < form.elements.length; i++) {
+    if(form.elements[i].type == "checkbox") {
+      if (document.getElementById(checkbox_id).checked) {
+        form.elements[i].checked = true;
+      } else {
+        form.elements[i].checked = false;
+      }
+    }
+  }
+}

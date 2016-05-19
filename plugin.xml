@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<e107Plugin name="Event Manager" lan="LAN_PLUGIN_EVENTMANAGER_NAME" version="1.0" date="2015-07-15" compatibility="2.0" installRequired="true">
+	<author name="René Schlegel" email="rene.schlegel@sendto.ch" />
+	<description lan="LAN_PLUGIN_EVENTMANAGER_DESCRIPTION" />
+	<keywords>
+		<word>date</word>
+		<word>event</word>
+		<word>calendar</word>
+	</keywords>
+	<category>misc</category>
+	<copyright>René Schlegel</copyright>
+	<siteLinks>
+		<!--<link url="{e_PLUGIN}events/event_view.php" perm='members'>Events</link> -->		
+	</siteLinks>
+	<adminLinks>
+		<link icon='images/event_32.png' iconSmall='images/event_16.png' primary='true' >"test"</link>
+	</adminLinks>
+</e107Plugin>

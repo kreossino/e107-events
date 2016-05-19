@@ -1,0 +1,368 @@
+<?php
+/*
++---------------------------------------------------------------+
+|     Event-System for e107 v2
+|        
+|     a plugin for the e107 website system
+|     http://www.e107.org/
+|
+|     © schlrech
+|     rene.schlegel@sendto.ch
++---------------------------------------------------------------+
+*/
+require_once("../../class2.php");
+
+if (!e107::isInstalled('events') or !check_class(e_UC_MEMBER))
+{
+	header("Location: ".e_BASE."index.php");
+	exit;
+}
+if(!defined("USER_WIDTH")){ define("USER_WIDTH","width:95%"); }
+
+require_once(HEADERF);
+e107::lan('events');
+e107::css('events','events.css');
+
+$mes = e107::getMessage();
+$frm = e107::getForm();
+$sql = e107::getDB();
+$log = e107::getLog();
+
+$event_id 	= $_GET['id'];
+$meld		= $_GET['meld'];
+
+if ($_GET['action']=="details") {
+	$akt_plaetze = $sql->db_Count("events_anmeldung", "(*)", " WHERE event_id = " . $_GET['id']);
+
+	// Event
+	$query = "SELECT e.*, u.user_login FROM #events as e 
+				LEFT JOIN #user as u ON e.verfasser  = u.user_id
+				WHERE e.id=" . $_GET['id'] . " GROUP BY u.user_id ORDER BY e.id ASC";
+	$sql->db_Select_Gen($query);
+	$row=$sql->db_Fetch(); 
+	$max_plaetze			= $row['event_max_plaetze'];
+	$free_plaetze			= $max_plaetze - $akt_plaetze;
+	$datum 					= date("d.m.Y", $row['event_datum']);
+	$datum_icon				= "icon-" . date("md", $row['event_datum']) . ".png";
+	$datum_anmeldeschluss 	= date("d.m.Y", $row['event_anmeldeschluss']);
+	$titel 					= "&#034;" . $row['event_name'] . "&#034;";
+	$details				= $tp->toHTML($row['event_details'], TRUE);
+	$verfasser				= $row['user_login'];
+	$ort					= $row['event_ort'];
+	$kosten					= $row['event_kosten'];
+	$verfasser_id			= $row['verfasser'];
+	
+	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
+	$text .= "
+		<tr>
+			<td>" . LAN_EVENT_42 . "</td>
+			<td>" . $verfasser . "</td>
+		</tr>
+		<tr >
+			<td style='vertical-align:middle' width='150'>" . LAN_EVENT_26 . "</td>
+			<td style='vertical-align:middle'>" . $datum . "&nbsp;<a class='e-tip' href='event_ical.php?action=create&id=$event_id' title='" . LAN_EVENT_62 . "'><img src='images/cal/" . $datum_icon . "' alt='" . $datum_icon . "' height='30' width='30'></a></td>
+			<!--<td>" . $datum . "</td>-->
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_63 . "</td>
+			<td>" . $ort . "</td>
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_64 . "</td>
+			<td>" . $kosten . "</td>
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_29 . "</td>
+			<td>" . $datum_anmeldeschluss . "</td>
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_41 . "</td>
+			<td>" . $free_plaetze . "</font> / " . $max_plaetze . "</td>
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_14 . "</td>
+			<td><a class='btn btn-xs btn-default e-tip' href='event_details.php?action=liste&id=$event_id' title='" . LAN_EVENT_14 . "'><span>" . $tp->toGlyph('fa-group') . "</span></a></td>
+		</tr>
+		<tr>
+			<td>" . LAN_EVENT_31 . "</td>
+			<td>" . $details . "</td>
+		</tr>
+		</table>
+		<table align=center>";
+		$sql->db_Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+		$row = $sql->db_Fetch();
+		if ($row['member_id'] != USERID) {
+			$angemeldet = false;
+		}else{
+			$angemeldet = true;
+		}
+		$text .= "<tr>
+			<td colspan=10><center>";
+		if ($angemeldet == false) {
+			$text .= "
+			<form action='event_details.php?action=checkin&id=$event_id' method='post'>
+				<input class='btn btn-primary' type='submit' name='anmelden' value='".LAN_EVENT_45."' />";
+		} else { 
+			$text .= "	
+			<form action='event_details.php?action=checkout&id=$event_id' method='post'>
+				<input class='btn btn-primary' type='submit' name='abmelden' value='".LAN_EVENT_47."' />";
+			// $text .= "	";
+		}
+	$text .=	"
+			<a class='btn btn-primary' href='event_view.php' title='" . LAN_EVENT_51 . "'>" . LAN_EVENT_51 . "</a>";
+			if (USERID == $verfasser_id OR check_class(e_UC_ADMIN)){
+				$text .= " <a class='btn btn-danger' href='event_details.php?action=sendmail&id=$event_id' title='" . LAN_EVENT_68 . "'>" . LAN_EVENT_68 . "</a>";
+			}
+$text .= "
+		</form>
+		</center></td>
+		</tr>
+	</table>";
+}
+		
+
+if ($_GET['action']=="liste") {
+	$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+	$row = $sql->db_fetch();
+	$max_plaetze	= $row['event_max_plaetze'];
+	$titel			= $row['event_name'];
+	
+	$query = "SELECT u.user_id, u.user_image, u.user_loginname, u.user_login FROM #user as u 
+				LEFT JOIN #events_anmeldung as r ON u.user_id = r.member_id 
+				WHERE r.event_id=" . $event_id . " GROUP BY u.user_id ORDER BY r.id ASC";
+	$counter = $sql->db_Select_Gen($query);
+
+	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
+	$text .="<tr>";
+		
+	$text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_38 . " " . $max_plaetze . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
+	$text .= "</tr><tr>";
+		$text .= "</tr></table>";
+	$tp->parseTemplate("{SETIMAGE: w=90&h=90&crop=1}",true); // set thumbnail size. 
+	while ($row = $sql->db_fetch()) {
+		$userData['user_image']	= $row['user_image'];
+		$userData['user_name']	= $row['user_loginname']; 
+		
+		$text .= "
+			<div id='bild'><a href='".e_HTTP."user.php?id.{$row['user_id']}'>" . $tp->toAvatar($userData) . $row['user_login'] . "</a>";
+			if(check_class(e_UC_MAINADMIN)) {
+				$text .= " <a class='btn btn-xs btn-default e-tip' href='?action=checkout&id=$event_id&user_id=" .  $row['user_id'] . "' title='" . LAN_EVENT_54. "'><span>" . $tp->toGlyph('fa-user-times') . "</span></a>";
+			}
+		$text .="</div>";
+	}
+
+	$sql->db_Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+	$row = $sql->db_Fetch();
+	if ($row['member_id'] != USERID) {
+		$angemeldet = false;
+	}else{
+		$angemeldet = true;
+	}
+	
+	$text .= "<table border=0 class='table table-striped' style='".USER_WIDTH."'>
+		<tr>
+			<td colspan=10><center>";
+		if ($angemeldet == false) {
+			$text .= "
+			<form action='event_details.php?action=checkin&id=$event_id' method='post'>
+				<input class='btn btn-primary' type='submit' name='anmelden' value='".LAN_EVENT_45."' />";
+		} else { 
+			// $text .= "<img src='images/accept.png'> " . LAN_EVENT_46;
+			$text .= "	<form action='event_details.php?action=checkout&id=$event_id' method='post'>
+							<input class='btn btn-primary' type='submit' name='abmelden' value='".LAN_EVENT_47."' />";
+			$text .= "	";
+		}
+	$text .=	"
+			<a class='btn btn-primary' href='event_view.php' title='" . LAN_EVENT_51 . "'>" . LAN_EVENT_51 . "</a>";
+	$text .= "
+		</form>
+		</center></td>
+		</tr>
+	</table>";	
+		
+		
+		if(check_class(e_UC_MAINADMIN)) {
+			$sql->db_Select("user", "user_id, user_login", "ORDER BY user_login", "nowhere");
+			while ($row = $sql->db_fetch()) {
+				$_r[$row['user_id']] = $row['user_login']; 
+			}
+			// print_a ($_r);
+			
+			$text.="<table>
+						<form action='event_details.php?action=checkin&id=$event_id' method='post'>
+							<tr>
+								<td>";
+				$text .= 			$frm->select('checkin_teilnehmer',$_r,false,'size=xxlarge',LAN_EVENT_55); 
+				$text .= "		</td>
+							</tr>
+							<tr><td></td></td>
+							<tr>
+								<td>
+									<input class='btn btn-primary' type='submit' name='anmelden' value='".LAN_EVENT_56."' />
+								</td>
+							</tr>
+						</form>
+					</table>";
+		}
+
+	// echo $meld;
+	
+}
+
+/*
+1 = Keine Plätze mehr frei
+2 = Anmeldeschluss verpasst
+3 = Anmeldung OK
+4 = Anmeldung verbindlich / Kein abmelden mehr
+5 = Abmeldung OK
+6 = Mails versenden
+*/
+switch ($meld) {
+	case 1:
+		$mes->setTitle(LAN_EVENT_11, E_MESSAGE_ERROR);
+		$mes->addError(LAN_EVENT_48);
+		break;
+	case 2:
+		$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$row = $sql->db_fetch();
+		$titel = $row['event_name'];
+		$log->add(LAN_EVENT_11, sprintf(LAN_EVENT_58, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
+		$mes->setTitle(LAN_EVENT_11, E_MESSAGE_ERROR);
+		$mes->addError(LAN_EVENT_43);
+		break;
+	case 3:
+		$mes->setTitle(LAN_EVENT_11, E_MESSAGE_SUCCESS);
+		$mes->addSuccess(LAN_EVENT_49);
+		break;
+	case 4:
+		$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$row = $sql->db_fetch();
+		$titel = $row['event_name'];
+		$log->add(LAN_EVENT_12, sprintf(LAN_EVENT_57, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
+		$mes->setTitle(LAN_EVENT_12, E_MESSAGE_ERROR);
+		$mes->addError(LAN_EVENT_44);
+		break;
+	case 5:
+		$mes->setTitle(LAN_EVENT_12, E_MESSAGE_INFO);
+		$mes->addInfo(LAN_EVENT_50);
+		break;
+	case 6:
+		$mes->setTitle(LAN_EVENT_69, E_MESSAGE_INFO);
+		$mes->addInfo(LAN_EVENT_70);
+		break;
+}
+
+if($_GET['action'] == "sendmail") {
+	$sql->db_select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
+	$row = $sql->db_Fetch();
+	$titel					= $row['event_name'];
+	$datum 					= date("d.m.Y", $row[event_datum]);
+	$datum_anmeldeschluss 	= date("d.m.Y", $row[event_anmeldeschluss]);
+	$verfasser				= $row['user_login'];
+	
+	$info = array(
+				'id'					=> $_GET['id'],
+				'event_name' 			=> $titel,
+				'event_datum' 			=> $datum,
+				'event_anmeldeschluss'	=> $datum_anmeldeschluss,
+				'verfasser'				=> $verfasser
+				); 
+	
+	e107::getEvent()->trigger("eventspost", $info);
+	$meld=6;
+	$pos = strpos($_SERVER["HTTP_REFERER"], "?");
+	if ($pos > 0) {
+		$pos = strpos($_SERVER["HTTP_REFERER"], "&meld");
+		if ($pos > 0) {
+			$aufruf = substr("{$_SERVER["HTTP_REFERER"]}",0,$pos);
+			header("Location: ". $aufruf . "&meld=" . $meld);
+		}else{
+			header("Location: {$_SERVER["HTTP_REFERER"]}". "&meld=" . $meld);
+		}
+	}else{
+		header("Location: {$_SERVER["HTTP_REFERER"]}");
+	}
+}
+
+// Anmeldung des jeweiligen Mitglieds am Event
+if($_GET['action'] == "checkin") {
+	$user_id = $_POST['checkin_teilnehmer'];
+	if ($user_id == "") {
+		$user_id=USERID;
+	}
+	
+	$sql->db_Select("events", "event_max_plaetze, event_anmeldeschluss", "id=" . $_GET['id']);
+	$row = $sql->db_fetch();
+	$counter_akt = $sql->db_Count("events_anmeldung", '(*)', "WHERE event_id=" . $_GET['id']);
+	$meld=3;
+	
+	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
+		$meld=2;
+	}
+
+	if ($counter_akt >= $row['event_max_plaetze'])	{
+		$meld=1;
+	}
+	
+	if ($meld==3) {
+		$result = $sql->db_Select("events_anmeldung", "member_id, event_id", " member_id=" . $user_id . " AND event_id=" . $_GET['id'] . " ORDER BY id");
+		if ($result==0){ //nur hinzufügen wenn noch nicht vorhanden
+			$arr_insert['member_id']	= $user_id;
+			$arr_insert['event_id']	= $_GET['id'];
+			$result = $sql->db_insert("events_anmeldung",$arr_insert);
+		}
+	}
+
+	$pos = strpos($_SERVER["HTTP_REFERER"], "?");
+	// echo $pos;
+	
+	if ($pos > 0) {
+		$pos = strpos($_SERVER["HTTP_REFERER"], "&meld");
+		if ($pos > 0) {
+			// $aufruf = "{$_SERVER["HTTP_REFERER"]}";
+			$aufruf = substr("{$_SERVER["HTTP_REFERER"]}",0,$pos);
+			header("Location: ". $aufruf . "&meld=" . $meld);
+		}else{
+			header("Location: {$_SERVER["HTTP_REFERER"]}". "&meld=" . $meld);
+		}
+	}else{
+		header("Location: {$_SERVER["HTTP_REFERER"]}");
+	}
+}
+
+// Abmeldung des jeweiligen Mitglieds am Event
+if($_GET['action'] == "checkout") {
+	$user_id = $_GET['user_id'];
+	if ($user_id == "") {
+		$user_id=USERID;
+	}
+	$meld=5;
+	$sql->db_Select("events", "event_anmeldeschluss", "id=" . $_GET['id']);
+	$row = $sql->db_fetch();
+		
+	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
+		$meld=4;
+	}
+	
+	if ($meld==5) {
+		$sql->db_Delete('events_anmeldung', 'member_id = ' . $user_id . ' AND event_id = ' . $_GET['id']);
+	}
+	
+	$pos = strpos($_SERVER["HTTP_REFERER"], "?");
+	if ($pos > 0) {
+		$pos = strpos($_SERVER["HTTP_REFERER"], "&meld");
+		if ($pos > 0) {
+			// $aufruf = "{$_SERVER["HTTP_REFERER"]}";
+			$aufruf = substr("{$_SERVER["HTTP_REFERER"]}",0,$pos);
+			header("Location: ". $aufruf . "&meld=" . $meld);
+		}else{
+			header("Location: {$_SERVER["HTTP_REFERER"]}". "&meld=" . $meld);
+		}
+	}else{
+		header("Location: {$_SERVER["HTTP_REFERER"]}");
+	}
+}
+
+$ns->tablerender(LAN_EVENT_37 . $titel, $mes->render().$text);
+require_once(FOOTERF);
+?>
