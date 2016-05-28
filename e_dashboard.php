@@ -20,7 +20,7 @@ class events_dashboard // include plugin-folder in the name.
 		
 		$var[0]['icon'] 	= "<img src='".e_PLUGIN_ABS."events/images/event_16.png' style='width: 16px; height: 16px; vertical-align: bottom' alt='' /> ";
 		$var[0]['title'] 	= LAN_EVENT_42;
-		$var[0]['url']		= e_PLUGIN."events/event_view.php";
+		$var[0]['url']		= e_PLUGIN."events/event_view.php?0.20.dup.old";
 		$var[0]['total'] 	= $event_posts;
 		$var[0]['invert'] 	= "";
 
