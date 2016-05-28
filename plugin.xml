@@ -13,7 +13,7 @@
 		<!--<link url="{e_PLUGIN}events/event_view.php" perm='members'>Events</link> -->		
 	</siteLinks>
 	<adminLinks>
-		<link url='' description='' icon='images/event_32.png' iconSmall='images/event_16.png' ></link>
+		<link url='' description='' icon='images/event_32.png' iconSmall='images/event_16.png' >LAN_CONFIGURE</link>
 		<!--<link icon='images/event_32.png' iconSmall='images/event_16.png' primary='true' >"test"</link>-->
 	</adminLinks>
 </e107Plugin>
