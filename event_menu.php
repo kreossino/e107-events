@@ -23,7 +23,7 @@ $sql = e107::getDB();
 //Anzahl Events anzeigen
 $anzahl_events = 5;
 $anzahl_zeichen = 45;
-$count = $sql->db_Count('events');
+$count = $sql->count('events');
 
 $event_text = '';
 
@@ -31,8 +31,8 @@ if (!check_class(e_UC_MEMBER)) {
 	$event_text = LAN_EVENT_21;	
 }else{
 	$query = "SELECT * FROM #events WHERE event_datum >= " . (time()-86400) . " ORDER BY event_datum ASC LIMIT " . $anzahl_events;
-	$sql->db_Select_Gen($query);
-	while ($row = $sql->db_fetch()) {
+	$sql->gen($query);
+	while ($row = $sql->fetch()) {
 		if (strlen($row['event_name']) > $anzahl_zeichen){
 			$event_text .= "	<a class='e-tip' href='" . e_HTTP . e_PLUGIN . "events/event_details.php?action=details&id={$row['id']}' title='" . LAN_EVENT_07 . " " . chr(34) . $row['event_name'] . chr(34) . " " . LAN_EVENT_02 . date("d.m.Y", $row[event_datum]) . LAN_EVENT_02a . "'>" . substr($row['event_name'],0,$anzahl_zeichen) . "...</a><br />";
 		}else{

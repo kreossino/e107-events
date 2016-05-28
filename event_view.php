@@ -65,24 +65,23 @@ if($order == "tup") {
 
 
 $text .= "
-<table border=0 class='table table-striped' style='".USER_WIDTH."'>
+<table border=0 class='table table-striped' style='margin-top:20px;' style='".USER_WIDTH."'>
 	
 	<tr>";
 	$text .= "	
-				<td colspan=2 width='130'>
+				<td>
 					" . LAN_EVENT_05 . " <a class='e-tip' href='?0.{$records}.dup" . $sort . "'>" . $parse->toGlyph('chevron-up') . "</a> <a class='e-tip' href='?0.{$records}.ddown" . $sort . "'>" . $parse->toGlyph('chevron-down') . "</a>
 				</td>
-				<td width='130'>
+				<td>
 					" . LAN_EVENT_08 . "
 				</td>
-				<td width='500'>
+				<td>
 					" . LAN_EVENT_07 . " <a class='e-tip' href='?0.{$records}.tup" . $sort . "'>" . $parse->toGlyph('chevron-up') . "</a> <a class='e-tip' href='?0.{$records}.tdown" . $sort . "'>" . $parse->toGlyph('chevron-down') . "</a>
 				</td>
-				<td width='85' style='text-align:right'>
+				<td style='text-align:right'>
 					" . LAN_EVENT_09 . "
 				</td>
-				<td width='5'></td>
-				<td width='60' style='text-align:center'>
+				<td style='text-align:right'>
 					" . LAN_EVENT_10 . "
 				</td>
 	</tr>";
@@ -91,12 +90,10 @@ $text .= "
 			$query .= " WHERE event_datum >= " . (time()-86400);
 		}
 		$query .= $mysqlorder;
-		$counter = $sql->db_Select_Gen($query);
+		$counter = $sql->gen($query);
 		$query .= " LIMIT " . $from . ", " . $records;
 		// echo $query;
-// echo $query;
-		$sql->db_Select_Gen($query);
-		// $sql2 = new db();
+		$sql->gen($query);
 		
 		$trans = array(
 			'Mon'       => 'Mo',
@@ -107,7 +104,7 @@ $text .= "
 			'Sat'       => 'Sa',
 			'Sun'       => 'So'
 		);
-		while ($row = $sql->db_fetch()) {
+		while ($row = $sql->fetch()) {
 			$id            			= $row['id'];
 			$datum					= date("d.m.Y", $row[event_datum]);
 			$tag					= date("D,", $row[event_datum]);
@@ -117,92 +114,74 @@ $text .= "
 			$max_plaetze			= $row['event_max_plaetze'];
 			$datum_anmeldeschluss 	= date("d.m.Y", $row['event_anmeldeschluss']);
 			
-			$places = $sql2->db_Count('events_anmeldung', '(*)' , "WHERE event_id={$id}");
+			$places = $sql2->count('events_anmeldung', '(*)' , "WHERE event_id={$id}");
 			
 			// Spieler schon angemeldet?
-			$angemeldet = $sql2->db_Select("events_anmeldung", "*", "member_id=" . USERID . " AND event_id=" . $id);
+			$angemeldet = $sql2->select("events_anmeldung", "*", "member_id=" . USERID . " AND event_id=" . $id);
 
-			$text .= "
-						<tr>";
-				$text .= "
-							<td width='1' class='fborder'>" . $tag . "</td>
-							<td width='120'>" . $datum . "</td>";
-				$text .= "
-							<td width=120>" . $datum_anmeldeschluss . "</td>";
-				$text .= "	<td><a class='e-tip' href='event_details.php?action=details&id=$id' title='" . $titel . "'>" . $titel . "</a></td>";
-				$text .= "	<td width=100 style='text-align:right';>" . ($max_plaetze - $places) . " / " . $max_plaetze . "</td>
-							<td>
-							<td width=100 style='text-align:center'>";
-							
-							$text.="
-									<div class='btn-group'>
-									  <a class='btn btn-xs btn-default e-tip' href='event_details.php?action=details&id=$id' title='" . LAN_EVENT_17 . "'><span>" . $tp->toGlyph('fa-info-circle') . "</span> </a>
-									  <a class='btn btn-xs btn-default e-tip' href='event_details.php?action=liste&id=$id' title='" . LAN_EVENT_14 . "'><span>" . $tp->toGlyph('fa-group') . "</span> </a>
-									 ";
-									// <a class='btn btn-xs btn-default e-tip' href='event_details.php?action=liste&id=$id' title='" . LAN_EVENT_14 . "'><span>" . $tp->toGlyph('fa-edit') . "</span> </a>
-									 // echo $tp->toGlyph('fa-edit');
-			
-							// $text .= "	<a class='e-tip' href='event_details.php?action=details&id=$id' title='" . LAN_EVENT_17 . "'><img src='images/info.png' border='0'></a>";
-							// $text .= "	<a class='btn btn-xs btn-default e-tip' href='event_details.php?action=liste&id=$id' title='" . LAN_EVENT_14 . "'><img src='images/glyphicons_042_group.png' width='14'></a>";
-							
-							//define('e_UC_PUBLIC', 0);
-							//define('e_UC_MAINADMIN', 250);
-							//define('e_UC_READONLY', 251);
-							//define('e_UC_GUEST', 252);
-							//define('e_UC_MEMBER', 253);
-							//define('e_UC_ADMIN', 254);
-							//define('e_UC_NOBODY', 255); 
-							if(check_class(e_UC_MAINADMIN) or $verfasser == USERID) {;
-								$text .="
-									<a class='btn btn-xs btn-default e-tip' href='event_add.php?action=edit&id=$id' title='" . LAN_EVENT_13 . "'><span>" . $tp->toGlyph('fa-edit') . "</span> </a>
-									<a class='btn btn-xs btn-default e-tip' onclick=\"return jsconfirm('".$tp->toJS(LAN_EVENT_06)."', '".$titel."')\" href='event_view.php?action=del&id=$id' title='" . LAN_EVENT_15 . "'><span>" . $tp->toGlyph('fa-trash') . "</span> </a>
-								</div>";
-								// $text .= "	<a class='e-tip' href='event_add.php?action=edit&id=$id' title='" . LAN_EVENT_13 . "'><img src='images/edit.png' border='0'></a>";
-								// $text .= "	<a class='e-tip' onclick=\"return jsconfirm('".$tp->toJS(LAN_EVENT_06)."', '".$titel."')\" href='event_view.php?action=del&id=$id' title='" . LAN_EVENT_15 . "'><img src='images/del.png' border='0'></a>";
-							}
-				$text .= "
-							</td>
-						</tr>";
+			$text .= "<tr>";
+			$text .= "	<td>" . $tag . " " . $datum . "</td>";
+			$text .= "	<td>" . $datum_anmeldeschluss . "</td>";
+			$text .= "	<td><a class='e-tip' href='event_details.php?action=details&id=$id' title='" . $titel . "'>" . $titel . "</a></td>";
+			$text .= "	<td style='text-align:right';>" . ($max_plaetze - $places) . " / " . $max_plaetze . "</td>";
+			$text .= "	<td style='text-align:right'>";
+			$text .= "		<div class='btn-group'>
+								<a class='btn btn-xs btn-default e-tip' href='event_details.php?action=details&id=$id' title='" . LAN_EVENT_17 . "'><span>" . $tp->toGlyph('fa-info-circle') . "</span> </a>
+								<a class='btn btn-xs btn-default e-tip' href='event_details.php?action=liste&id=$id' title='" . LAN_EVENT_14 . "'><span>" . $tp->toGlyph('fa-group') . "</span> </a>";
+
+								//define('e_UC_PUBLIC', 0);
+								//define('e_UC_MAINADMIN', 250);
+								//define('e_UC_READONLY', 251);
+								//define('e_UC_GUEST', 252);
+								//define('e_UC_MEMBER', 253);
+								//define('e_UC_ADMIN', 254);
+								//define('e_UC_NOBODY', 255); 
+								if(check_class(e_UC_MAINADMIN) or $verfasser == USERID) {;
+									$text .= "<a class='btn btn-xs btn-default e-tip' href='event_add.php?action=edit&id=$id' title='" . LAN_EVENT_13 . "'><span>" . $tp->toGlyph('fa-edit') . "</span> </a>
+											  <a class='btn btn-xs btn-default e-tip' onclick=\"return jsconfirm('".$tp->toJS(LAN_EVENT_06)."', '".$titel."')\" href='event_view.php?action=del&id=$id' title='" . LAN_EVENT_15 . "'><span>" . $tp->toGlyph('fa-trash') . "</span> </a>";
+								}
+			$text .= "		</div>";
+			$text .= "	</td>
+					</tr>";
 		}
-		$text .= "
-						
-						<tr><td colspan='8' style='text-align:right'>" . LAN_EVENT_16 . $counter . "</td></tr>
-					</table>";
-				$text .= "<table align=center>
-						<tr>
-							<td colspan='8' style='text-align:center'>
-								<a href='event_add.php' title='" . LAN_EVENT_20 . "'><span class='btn btn-primary'>" . LAN_EVENT_20 . "</span></a>";
-								if ($oldevents != "old") {
-									$text .= " <a href='event_view.php?0.20.dup.old' title='" . LAN_EVENT_52 . "'><span class='btn btn-primary'>" . LAN_EVENT_52 . "</span></a>";
-								}else{
-									$text .= " <a href='event_view.php?0.20.dup' title='" . LAN_EVENT_53 . "'><span class='btn btn-primary'>" . LAN_EVENT_53 . "</span></a>";
-								}
-				$text .="</td>
-						</tr>
-						<tr>
-							<td colspan='8' style='text-align:center'>";
-								if ($oldevents == "old") {
-									$parms = $counter.",".$records.",".$from.",".e_SELF.'?[FROM].'.$records.".".$order."."."old";
-								}{
-									$parms = $counter.",".$records.",".$from.",".e_SELF.'?[FROM].'.$records.".".$order;								
-								}
-								// echo $parms;
-								$text .= $tp->parseTemplate("{NEXTPREV={$parms}}");
-				$text .= "	</td>
-						</tr>
-					</table>";
+$text .= "	<tr>
+				<td colspan='6' style='text-align:right'>" . LAN_EVENT_16 . $counter . "</td>
+			</tr>
+</table>";
+$text .= "
+<table align=center>
+	<tr>
+		<td colspan='6' style='text-align:center'>
+			<a href='event_add.php' title='" . LAN_EVENT_20 . "'><span class='btn btn-primary'>" . LAN_EVENT_20 . "</span></a>";
+			if ($oldevents != "old") {
+				$text .= " <a href='event_view.php?0.20.dup.old' title='" . LAN_EVENT_52 . "'><span class='btn btn-primary'>" . LAN_EVENT_52 . "</span></a>";
+			}else{
+				$text .= " <a href='event_view.php?0.20.dup' title='" . LAN_EVENT_53 . "'><span class='btn btn-primary'>" . LAN_EVENT_53 . "</span></a>";
+			}
+$text .="
+		</td>
+	</tr>
+	<tr>
+		<td colspan='6' style='text-align:center'>";
+			if ($oldevents == "old") {
+				$parms = $counter.",".$records.",".$from.",".e_SELF.'?[FROM].'.$records.".".$order."."."old";
+			}else{
+				$parms = $counter.",".$records.",".$from.",".e_SELF.'?[FROM].'.$records.".".$order;								
+			}
+			// echo $parms;
+			$text .= $tp->parseTemplate("{NEXTPREV={$parms}}");
+$text .= "	
+		</td>
+	</tr>
+</table>";
 			
 
 // Event löschen mit allen Anmeldungen
 if($_GET['action'] == "del") {
-	$sql->db_Delete('events', 'id = '.$_GET['id']);
-	$sql->db_Delete('events_anmeldung', 'event_id = '.$_GET['id']);
+	$sql->delete('events', 'id = '.$_GET['id']);
+	$sql->delete('events_anmeldung', 'event_id = '.$_GET['id']);
 	header("Location: {$_SERVER["HTTP_REFERER"]}");
-	// $text .= "<img src='images/loading2.gif'> loading... <meta http-equiv='refresh' content='0;URL=?{$from}.{$records}.{$order}'>";
 }
-// $mes->addSuccess(print_a($success,true)); 
-// $titel=LAN_EVENT_04;
-// $ns->tablerender("<DIV ALIGN=CENTER><h3><b>". $titel . "</b></h3></DIV>", $text);
 $ns->tablerender(LAN_EVENT_04, $mes->render().$text);
 require_once(FOOTERF);
 ?>

@@ -1,7 +1,10 @@
 #bild {
  float: left;
- width: 160px; height: 160px; (größe der Box, in der die Bilder liegen)
+ width: -1px; height: 160px; (größe der Box, in der die Bilder liegen)
  /*padding-left: 25px; (mein Abstand)*/
+}
+.panel-default {
+		margin-top:20px;
 }
 
 i.browsers {

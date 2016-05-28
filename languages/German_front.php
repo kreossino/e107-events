@@ -1,7 +1,7 @@
 <?php
 /*
 +---------------------------------------------------------------+
-|     Turnier-System for e107 v0.7+ and v0.8+
+|     Event-System for e107 v0.7+ and v0.8+
 |        
 |     a plugin for the e107 website system
 |     http://www.e107.org/

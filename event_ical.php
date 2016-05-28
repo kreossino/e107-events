@@ -5,8 +5,8 @@ require_once "includes/iCalcreator.class.php";
 $sql = e107::getDB();
 
 if ($_GET['action']=="create") {
-	$sql->db_Select("events", "*", "id=" . $_GET['id']);
-	$row = $sql->db_fetch();
+	$sql->select("events", "*", "id=" . $_GET['id']);
+	$row = $sql->fetch();
 	$title		= $row['event_name'];
 	$details	= $row['event_details'];
 	$datumStart	= date("Ymd", $row['event_datum']);

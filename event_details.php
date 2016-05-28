@@ -32,14 +32,14 @@ $event_id 	= $_GET['id'];
 $meld		= $_GET['meld'];
 
 if ($_GET['action']=="details") {
-	$akt_plaetze = $sql->db_Count("events_anmeldung", "(*)", " WHERE event_id = " . $_GET['id']);
+	$akt_plaetze = $sql->count("events_anmeldung", "(*)", " WHERE event_id = " . $_GET['id']);
 
 	// Event
 	$query = "SELECT e.*, u.user_login FROM #events as e 
 				LEFT JOIN #user as u ON e.verfasser  = u.user_id
 				WHERE e.id=" . $_GET['id'] . " GROUP BY u.user_id ORDER BY e.id ASC";
-	$sql->db_Select_Gen($query);
-	$row=$sql->db_Fetch(); 
+	$sql->gen($query);
+	$row=$sql->Fetch(); 
 	$max_plaetze			= $row['event_max_plaetze'];
 	$free_plaetze			= $max_plaetze - $akt_plaetze;
 	$datum 					= date("d.m.Y", $row['event_datum']);
@@ -89,8 +89,8 @@ if ($_GET['action']=="details") {
 		</tr>
 		</table>
 		<table align=center>";
-		$sql->db_Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
-		$row = $sql->db_Fetch();
+		$sql->Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+		$row = $sql->Fetch();
 		if ($row['member_id'] != USERID) {
 			$angemeldet = false;
 		}else{
@@ -122,15 +122,15 @@ $text .= "
 		
 
 if ($_GET['action']=="liste") {
-	$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
-	$row = $sql->db_fetch();
+	$sql->Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+	$row = $sql->fetch();
 	$max_plaetze	= $row['event_max_plaetze'];
 	$titel			= $row['event_name'];
 	
 	$query = "SELECT u.user_id, u.user_image, u.user_loginname, u.user_login FROM #user as u 
 				LEFT JOIN #events_anmeldung as r ON u.user_id = r.member_id 
 				WHERE r.event_id=" . $event_id . " GROUP BY u.user_id ORDER BY r.id ASC";
-	$counter = $sql->db_Select_Gen($query);
+	$counter = $sql->gen($query);
 
 	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
 	$text .="<tr>";
@@ -139,20 +139,20 @@ if ($_GET['action']=="liste") {
 	$text .= "</tr><tr>";
 		$text .= "</tr></table>";
 	$tp->parseTemplate("{SETIMAGE: w=90&h=90&crop=1}",true); // set thumbnail size. 
-	while ($row = $sql->db_fetch()) {
+	while ($row = $sql->fetch()) {
 		$userData['user_image']	= $row['user_image'];
 		$userData['user_name']	= $row['user_loginname']; 
 		
 		$text .= "
-			<div id='bild'><a href='".e_HTTP."user.php?id.{$row['user_id']}'>" . $tp->toAvatar($userData) . $row['user_login'] . "</a>";
+			<div id='bild'><a href='".e_HTTP."user.php?id.{$row['user_id']}'>" . $tp->toAvatar($userData) . "<br>" . $row['user_login'] . "</a>";
 			if(check_class(e_UC_MAINADMIN)) {
 				$text .= " <a class='btn btn-xs btn-default e-tip' href='?action=checkout&id=$event_id&user_id=" .  $row['user_id'] . "' title='" . LAN_EVENT_54. "'><span>" . $tp->toGlyph('fa-user-times') . "</span></a>";
 			}
 		$text .="</div>";
 	}
 
-	$sql->db_Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
-	$row = $sql->db_Fetch();
+	$sql->select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+	$row = $sql->fetch();
 	if ($row['member_id'] != USERID) {
 		$angemeldet = false;
 	}else{
@@ -182,8 +182,8 @@ if ($_GET['action']=="liste") {
 		
 		
 		if(check_class(e_UC_MAINADMIN)) {
-			$sql->db_Select("user", "user_id, user_login", "ORDER BY user_login", "nowhere");
-			while ($row = $sql->db_fetch()) {
+			$sql->select("user", "user_id, user_login", "ORDER BY user_login", "nowhere");
+			while ($row = $sql->fetch()) {
 				$_r[$row['user_id']] = $row['user_login']; 
 			}
 			// print_a ($_r);
@@ -223,8 +223,8 @@ switch ($meld) {
 		$mes->addError(LAN_EVENT_48);
 		break;
 	case 2:
-		$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
-		$row = $sql->db_fetch();
+		$sql->select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$row = $sql->fetch();
 		$titel = $row['event_name'];
 		$log->add(LAN_EVENT_11, sprintf(LAN_EVENT_58, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
 		$mes->setTitle(LAN_EVENT_11, E_MESSAGE_ERROR);
@@ -235,8 +235,8 @@ switch ($meld) {
 		$mes->addSuccess(LAN_EVENT_49);
 		break;
 	case 4:
-		$sql->db_Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
-		$row = $sql->db_fetch();
+		$sql->select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$row = $sql->fetch();
 		$titel = $row['event_name'];
 		$log->add(LAN_EVENT_12, sprintf(LAN_EVENT_57, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
 		$mes->setTitle(LAN_EVENT_12, E_MESSAGE_ERROR);
@@ -253,12 +253,13 @@ switch ($meld) {
 }
 
 if($_GET['action'] == "sendmail") {
-	$sql->db_select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
-	$row = $sql->db_Fetch();
+	$sql->select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
+	$row = $sql->fetch();
 	$titel					= $row['event_name'];
 	$datum 					= date("d.m.Y", $row[event_datum]);
 	$datum_anmeldeschluss 	= date("d.m.Y", $row[event_anmeldeschluss]);
-	$verfasser				= $row['user_login'];
+	$verfasser_id			= $row['verfasser'];
+	$verfasser				= $sql->retrieve('user', 'user_login', 'user_id=' . $verfasser_id);
 	
 	$info = array(
 				'id'					=> $_GET['id'],
@@ -291,9 +292,9 @@ if($_GET['action'] == "checkin") {
 		$user_id=USERID;
 	}
 	
-	$sql->db_Select("events", "event_max_plaetze, event_anmeldeschluss", "id=" . $_GET['id']);
-	$row = $sql->db_fetch();
-	$counter_akt = $sql->db_Count("events_anmeldung", '(*)', "WHERE event_id=" . $_GET['id']);
+	$sql->select("events", "event_max_plaetze, event_anmeldeschluss", "id=" . $_GET['id']);
+	$row = $sql->fetch();
+	$counter_akt = $sql->count("events_anmeldung", '(*)', "WHERE event_id=" . $_GET['id']);
 	$meld=3;
 	
 	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
@@ -303,16 +304,15 @@ if($_GET['action'] == "checkin") {
 	if ($counter_akt >= $row['event_max_plaetze'])	{
 		$meld=1;
 	}
-	
 	if ($meld==3) {
-		$result = $sql->db_Select("events_anmeldung", "member_id, event_id", " member_id=" . $user_id . " AND event_id=" . $_GET['id'] . " ORDER BY id");
+		$result = $sql->select("events_anmeldung", "member_id, event_id", " member_id=" . $user_id . " AND event_id=" . $_GET['id'] . " ORDER BY id");
+		// print_r ($result);
 		if ($result==0){ //nur hinzufügen wenn noch nicht vorhanden
 			$arr_insert['member_id']	= $user_id;
-			$arr_insert['event_id']	= $_GET['id'];
-			$result = $sql->db_insert("events_anmeldung",$arr_insert);
+			$arr_insert['event_id']		= $_GET['id'];
+			$result = $sql->insert("events_anmeldung",$arr_insert);
 		}
 	}
-
 	$pos = strpos($_SERVER["HTTP_REFERER"], "?");
 	// echo $pos;
 	
@@ -337,15 +337,15 @@ if($_GET['action'] == "checkout") {
 		$user_id=USERID;
 	}
 	$meld=5;
-	$sql->db_Select("events", "event_anmeldeschluss", "id=" . $_GET['id']);
-	$row = $sql->db_fetch();
+	$sql->select("events", "event_anmeldeschluss", "id=" . $_GET['id']);
+	$row = $sql->fetch();
 		
 	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
 		$meld=4;
 	}
 	
 	if ($meld==5) {
-		$sql->db_Delete('events_anmeldung', 'member_id = ' . $user_id . ' AND event_id = ' . $_GET['id']);
+		$sql->delete('events_anmeldung', 'member_id = ' . $user_id . ' AND event_id = ' . $_GET['id']);
 	}
 	
 	$pos = strpos($_SERVER["HTTP_REFERER"], "?");

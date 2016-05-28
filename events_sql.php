@@ -13,7 +13,7 @@ CREATE TABLE e107_events (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 CREATE TABLE e107_events_anmeldung (
-  id int(10) NOT NULL,
+  id int(10) NOT NULL auto_increment,
   member_id int(10) NOT NULL,
   event_id int(10) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

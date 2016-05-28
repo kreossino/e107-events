@@ -82,7 +82,7 @@ if (isset($_POST['add_event'])) {
 				$arr_update['event_kosten']			= $tp->toDB($kosten);
 				
 				$arr_update['WHERE'] = 'id = '. $_GET['id'];
-				$result = $sql->db_update('events', $arr_update);
+				$result = $sql->update('events', $arr_update);
 				// print_r ($arr_update);
 				// exit;
 			}else{
@@ -97,7 +97,7 @@ if (isset($_POST['add_event'])) {
 				$arr_insert['event_ort']			= $tp->toDB($ort);
 				$arr_insert['event_kosten']			= $tp->toDB($kosten);
 				
-				$result = $sql->db_insert('events', $arr_insert);
+				$result = $sql->insert('events', $arr_insert);
 			}
 			
 			if ($result > 0){	
@@ -124,8 +124,8 @@ if (isset($_POST['add_event'])) {
 
 //prüfen ob editieren angesagt ist
 if ($_GET['action']=='edit'){
-	$sql->db_select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
-	$row = $sql->db_Fetch();
+	$sql->select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
+	$row = $sql->Fetch();
 	$titel					= $row['event_name'];
 	$datum 					= date("d.m.Y", $row[event_datum]);
 	$datum_anmeldeschluss 	= date("d.m.Y", $row[event_anmeldeschluss]);

@@ -1,7 +1,7 @@
 <?php
 /*
 +---------------------------------------------------------------+
-|     Turnier-System for e107 v0.7+ and v0.8+
+|     Event-System for e107 v0.7+ and v0.8+
 |        
 |     a plugin for the e107 website system
 |     http://www.e107.org/
@@ -11,45 +11,45 @@
 +---------------------------------------------------------------+
 */
 
-define(LAN_EVENT_01,'Upcoming Events');
-define(LAN_EVENT_02,' findet am ');
-define(LAN_EVENT_02a,' statt.');
-define(LAN_EVENT_03,'Klicke um den Event anzuschauen');
-define(LAN_EVENT_04,'Event overview');
-define(LAN_EVENT_05,'Datum');
-define(LAN_EVENT_06,'Event wirklich löschen?');
+define(LAN_EVENT_01,'upcoming events');
+define(LAN_EVENT_02,' take place at the ');
+define(LAN_EVENT_02a,'');
+define(LAN_EVENT_03,'click to show the event');
+define(LAN_EVENT_04,'event overview');
+define(LAN_EVENT_05,'date');
+define(LAN_EVENT_06,'delete this event?');
 define(LAN_EVENT_07,'Event');
-define(LAN_EVENT_08,'Anmeldeschluss');
-define(LAN_EVENT_09,'Freie Plätze');
+define(LAN_EVENT_08,'deadline');
+define(LAN_EVENT_09,'free places ');
 define(LAN_EVENT_10,'Action');
-define(LAN_EVENT_11,'Event Anmelden');
-define(LAN_EVENT_12,'Event Abmeldung');
-define(LAN_EVENT_13,'Event bearbeiten');
-define(LAN_EVENT_14,'Teilnehmer');
+define(LAN_EVENT_11,'Event checkin');
+define(LAN_EVENT_12,'Event checkout');
+define(LAN_EVENT_13,'edit event');
+define(LAN_EVENT_14,'member');
 define(LAN_EVENT_15,'delete Event');
-define(LAN_EVENT_16,'Anzahl Events: ');
-define(LAN_EVENT_17,'Event Detail');
-define(LAN_EVENT_18,'Am Event anmelden');
-define(LAN_EVENT_19,'Am Event Abmeldung');
-define(LAN_EVENT_20,'Neuen Event erstellen');
-define(LAN_EVENT_21,'Du musst dich einloggen oder registrieren um Events zu sehen.');
-define(LAN_EVENT_22,'Neuer Event');
-define(LAN_EVENT_23,'Event speichern');
-define(LAN_EVENT_24,'Event aktualisieren');
-define(LAN_EVENT_25,'Event Name:');
-define(LAN_EVENT_26,'Event Date:');
-define(LAN_EVENT_27,'max. Plätze:');
-define(LAN_EVENT_28,'Cancel');
-define(LAN_EVENT_29,'Anmeldeschluss');
-define(LAN_EVENT_30,'Anmeldeschluss kann nicht nach dem Event Datum sein');
-define(LAN_EVENT_31,'Event Details:');
-define(LAN_EVENT_32,'Bitte gebe einen Event-Name an');
-define(LAN_EVENT_33,'Bitte gib ein Korrektes Datum an (dd.mm.yyyy)');
-define(LAN_EVENT_34,'Das Datum liegt in der Vergangenheit');
-define(LAN_EVENT_35,'Event wurde erfolgreich gespeichert');
-define(LAN_EVENT_36,'Der Event konnte nicht gespeichert werden');
-define(LAN_EVENT_37,'Event: ');
-define(LAN_EVENT_38,'von');
+define(LAN_EVENT_16,'number of Events: ');
+define(LAN_EVENT_17,'Event detail');
+define(LAN_EVENT_18,'subscribe at the event');
+define(LAN_EVENT_19,'unsubscribe at the event');
+define(LAN_EVENT_20,'creat a new event');
+define(LAN_EVENT_21,'You have to login or register to see the event.');
+define(LAN_EVENT_22,'new event');
+define(LAN_EVENT_23,'save event');
+define(LAN_EVENT_24,'update the event');
+define(LAN_EVENT_25,'event name:');
+define(LAN_EVENT_26,'event date:');
+define(LAN_EVENT_27,'max. places:');
+define(LAN_EVENT_28,'cancel');
+define(LAN_EVENT_29,'deadline');
+define(LAN_EVENT_30,'deadline can not be after the date of the event');
+define(LAN_EVENT_31,'event details:');
+define(LAN_EVENT_32,'Please give your event a name');
+define(LAN_EVENT_33,'pleas take a correct date (dd.mm.yyyy)');
+define(LAN_EVENT_34,'the date is in the past');
+define(LAN_EVENT_35,'The date was successfull saved');
+define(LAN_EVENT_36,'The event couldn&apos;t saved');
+define(LAN_EVENT_37,'event: ');
+define(LAN_EVENT_38,'from');
 define(LAN_EVENT_39,'Mitglieder haben sich für den Event');
 define(LAN_EVENT_40,'angemeldet:');
 define(LAN_EVENT_41,'Anzahl freie Plätze:');
