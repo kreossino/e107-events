@@ -43,7 +43,8 @@ if ($_GET['action']=="details") {
 	$max_plaetze			= $row['event_max_plaetze'];
 	$free_plaetze			= $max_plaetze - $akt_plaetze;
 	$datum 					= date("d.m.Y", $row['event_datum']);
-	$datum_icon				= "icon-" . date("md", $row['event_datum']) . ".png";
+	// $datum_icon				= "icon-" . date("md", $row['event_datum']) . ".png";
+	// $datum_icon				= "event_32.png";
 	$datum_anmeldeschluss 	= date("d.m.Y", $row['event_anmeldeschluss']);
 	$titel 					= "&#034;" . $row['event_name'] . "&#034;";
 	$details				= $tp->toHTML($row['event_details'], TRUE);
@@ -60,7 +61,7 @@ if ($_GET['action']=="details") {
 		</tr>
 		<tr >
 			<td style='vertical-align:middle' width='150'>" . LAN_EVENT_26 . "</td>
-			<td style='vertical-align:middle'>" . $datum . "&nbsp;<a class='e-tip' href='event_ical.php?action=create&id=$event_id' title='" . LAN_EVENT_62 . "'><img src='images/cal/" . $datum_icon . "' alt='" . $datum_icon . "' height='30' width='30'></a></td>
+			<td style='vertical-align:middle'>" . $datum . "&nbsp;<a class='e-tip' href='event_ical.php?action=create&id=$event_id' title='" . LAN_EVENT_62 . "'><img src='images/event_32.png' alt='event_32.png' height='30' width='30'></a></td>
 			<!--<td>" . $datum . "</td>-->
 		</tr>
 		<tr>
