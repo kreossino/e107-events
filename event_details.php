@@ -136,7 +136,8 @@ if ($_GET['action']=="liste") {
 	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
 	$text .="<tr>";
 		
-	$text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_38 . " " . $max_plaetze . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
+	// $text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_38 . " " . $max_plaetze . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
+	$text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
 	$text .= "</tr><tr>";
 		$text .= "</tr></table>";
 	$tp->parseTemplate("{SETIMAGE: w=90&h=90&crop=1}",true); // set thumbnail size. 
