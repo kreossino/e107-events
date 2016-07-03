@@ -29,7 +29,7 @@ class events_dashboard // include plugin-folder in the name.
 		$var[1]['title'] 	= LAN_EVENT_42a;
 		$var[1]['url']		= e_ADMIN."admin_log.php?searchquery=&filter_options=dblog_eventcode__EventMgr";
 		$var[1]['total'] 	= $event_logs;
-		$var[1]['invert']	= "nicht leer";
+		$var[1]['invert']	= "not empty";
 		
 		return $var;
 	}	

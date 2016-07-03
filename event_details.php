@@ -10,14 +10,16 @@
 |     rene.schlegel@sendto.ch
 +---------------------------------------------------------------+
 */
-require_once("../../class2.php");
+if (!defined('e107_INIT'))
+{
+	require_once("../../class2.php");
+}
 
 if (!e107::isInstalled('events') or !check_class(e_UC_MEMBER))
 {
-	header("Location: ".e_BASE."index.php");
+	e107::redirect();
 	exit;
 }
-if(!defined("USER_WIDTH")){ define("USER_WIDTH","width:95%"); }
 
 require_once(HEADERF);
 e107::lan('events');
@@ -32,53 +34,50 @@ $event_id 	= $_GET['id'];
 $meld		= $_GET['meld'];
 
 if ($_GET['action']=="details") {
-	$akt_plaetze = $sql->count("events_anmeldung", "(*)", " WHERE event_id = " . $_GET['id']);
+	$akt_plaetze = $sql->count("events_registration", "(*)", " WHERE event_id = " . $_GET['id']);
 
 	// Event
 	$query = "SELECT e.*, u.user_login FROM #events as e 
-				LEFT JOIN #user as u ON e.verfasser  = u.user_id
+				LEFT JOIN #user as u ON e.event_author = u.user_id
 				WHERE e.id=" . $_GET['id'] . " GROUP BY u.user_id ORDER BY e.id ASC";
 	$sql->gen($query);
 	$row=$sql->Fetch(); 
-	$max_plaetze			= $row['event_max_plaetze'];
-	$free_plaetze			= $max_plaetze - $akt_plaetze;
-	$datum 					= date("d.m.Y", $row['event_datum']);
-	// $datum_icon				= "icon-" . date("md", $row['event_datum']) . ".png";
-	// $datum_icon				= "event_32.png";
-	$datum_anmeldeschluss 	= date("d.m.Y", $row['event_anmeldeschluss']);
-	$titel 					= "&#034;" . $row['event_name'] . "&#034;";
-	$details				= $tp->toHTML($row['event_details'], TRUE);
-	$verfasser				= $row['user_login'];
-	$ort					= $row['event_ort'];
-	$kosten					= $row['event_kosten'];
-	$verfasser_id			= $row['verfasser'];
+	$event_max_places	= $row['event_max_places'];
+	$free_plaetze		= $event_max_places - $akt_plaetze;
+	$event_date			= date("d.m.Y", $row['event_date']);
+	$event_deadline 	= date("d.m.Y", $row['event_deadline']);
+	$titel 				= "&#034;" . $row['event_name'] . "&#034;";
+	$event_details			= $tp->toHTML($row['event_details'], TRUE);
+	$event_author		= $row['user_login'];
+	$event_location		= $row['event_location'];
+	$event_costs		= $row['event_costs'];
+	$event_author_id	= $row['event_author'];
 	
 	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
 	$text .= "
 		<tr>
 			<td>" . LAN_EVENT_42 . "</td>
-			<td>" . $verfasser . "</td>
+			<td>" . $event_author . "</td>
 		</tr>
 		<tr >
 			<td style='vertical-align:middle' width='150'>" . LAN_EVENT_26 . "</td>
-			<td style='vertical-align:middle'>" . $datum . "&nbsp;<a class='e-tip' href='event_ical.php?action=create&id=$event_id' title='" . LAN_EVENT_62 . "'><img src='images/event_32.png' alt='event_32.png' height='30' width='30'></a></td>
-			<!--<td>" . $datum . "</td>-->
+			<td style='vertical-align:middle'>" . $event_date . "&nbsp;<a class='e-tip' href='event_ical.php?action=create&id=$event_id' title='" . LAN_EVENT_62 . "'><img src='images/event_32.png' alt='event_32.png' height='30' width='30'></a></td>
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_63 . "</td>
-			<td>" . $ort . "</td>
+			<td>" . $event_location . "</td>
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_64 . "</td>
-			<td>" . $kosten . "</td>
+			<td>" . $event_costs . "</td>
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_29 . "</td>
-			<td>" . $datum_anmeldeschluss . "</td>
+			<td>" . $event_deadline . "</td>
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_41 . "</td>
-			<td>" . $free_plaetze . "</font> / " . $max_plaetze . "</td>
+			<td>" . $free_plaetze . "</font> / " . $event_max_places . "</td>
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_14 . "</td>
@@ -86,11 +85,11 @@ if ($_GET['action']=="details") {
 		</tr>
 		<tr>
 			<td>" . LAN_EVENT_31 . "</td>
-			<td>" . $details . "</td>
+			<td>" . $event_details . "</td>
 		</tr>
 		</table>
 		<table align=center>";
-		$sql->Select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+		$sql->Select("events_registration", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
 		$row = $sql->Fetch();
 		if ($row['member_id'] != USERID) {
 			$angemeldet = false;
@@ -111,7 +110,7 @@ if ($_GET['action']=="details") {
 		}
 	$text .=	"
 			<a class='btn btn-primary' href='event_view.php' title='" . LAN_EVENT_51 . "'>" . LAN_EVENT_51 . "</a>";
-			if (USERID == $verfasser_id OR check_class(e_UC_ADMIN)){
+			if (USERID == $event_author_id OR check_class(e_UC_ADMIN)){
 				$text .= " <a class='btn btn-danger' href='event_details.php?action=sendmail&id=$event_id' title='" . LAN_EVENT_68 . "'>" . LAN_EVENT_68 . "</a>";
 			}
 $text .= "
@@ -120,23 +119,22 @@ $text .= "
 		</tr>
 	</table>";
 }
-		
 
 if ($_GET['action']=="liste") {
-	$sql->Select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+	$sql->Select("events", "event_max_places, event_name", "id=" . $event_id);
 	$row = $sql->fetch();
-	$max_plaetze	= $row['event_max_plaetze'];
+	$event_max_places	= $row['event_max_places'];
 	$titel			= $row['event_name'];
 	
 	$query = "SELECT u.user_id, u.user_image, u.user_loginname, u.user_login FROM #user as u 
-				LEFT JOIN #events_anmeldung as r ON u.user_id = r.member_id 
+				LEFT JOIN #events_registration as r ON u.user_id = r.member_id 
 				WHERE r.event_id=" . $event_id . " GROUP BY u.user_id ORDER BY r.id ASC";
 	$counter = $sql->gen($query);
 
 	$text = "<table border=0 class='table table-striped' style='".USER_WIDTH."'>";
 	$text .="<tr>";
 		
-	// $text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_38 . " " . $max_plaetze . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
+	// $text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_38 . " " . $event_max_places . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
 	$text .= "<td colspan=10>" . $counter . " " . LAN_EVENT_39 . " " . chr(34) . "<b>" . $titel . chr(34) . "</b> " . LAN_EVENT_40 . "</td>";
 	$text .= "</tr><tr>";
 		$text .= "</tr></table>";
@@ -153,7 +151,7 @@ if ($_GET['action']=="liste") {
 		$text .="</div>";
 	}
 
-	$sql->select("events_anmeldung", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
+	$sql->select("events_registration", "*", " member_id=" . USERID . " AND event_id=" . $event_id);
 	$row = $sql->fetch();
 	if ($row['member_id'] != USERID) {
 		$angemeldet = false;
@@ -225,7 +223,7 @@ switch ($meld) {
 		$mes->addError(LAN_EVENT_48);
 		break;
 	case 2:
-		$sql->select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$sql->select("events", "event_max_places, event_name", "id=" . $event_id);
 		$row = $sql->fetch();
 		$titel = $row['event_name'];
 		$log->add(LAN_EVENT_11, sprintf(LAN_EVENT_58, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
@@ -237,7 +235,7 @@ switch ($meld) {
 		$mes->addSuccess(LAN_EVENT_49);
 		break;
 	case 4:
-		$sql->select("events", "event_max_plaetze, event_name", "id=" . $event_id);
+		$sql->select("events", "event_max_places, event_name", "id=" . $event_id);
 		$row = $sql->fetch();
 		$titel = $row['event_name'];
 		$log->add(LAN_EVENT_12, sprintf(LAN_EVENT_57, USERNAME, $titel), E_LOG_FATAL, LAN_EVENT_59);
@@ -257,18 +255,18 @@ switch ($meld) {
 if($_GET['action'] == "sendmail") {
 	$sql->select("events", "*", "id=" . $_GET['id'] . " ORDER BY id ASC");
 	$row = $sql->fetch();
-	$titel					= $row['event_name'];
-	$datum 					= date("d.m.Y", $row[event_datum]);
-	$datum_anmeldeschluss 	= date("d.m.Y", $row[event_anmeldeschluss]);
-	$verfasser_id			= $row['verfasser'];
-	$verfasser				= $sql->retrieve('user', 'user_login', 'user_id=' . $verfasser_id);
+	$titel				= $row['event_name'];
+	$event_date 		= date("d.m.Y", $row['event_date']);
+	$event_deadline 	= date("d.m.Y", $row['event_deadline']);
+	$event_author_id	= $row['event_author'];
+	$event_author		= $sql->retrieve('user', 'user_login', 'user_id=' . $event_author_id);
 	
 	$info = array(
-				'id'					=> $_GET['id'],
-				'event_name' 			=> $titel,
-				'event_datum' 			=> $datum,
-				'event_anmeldeschluss'	=> $datum_anmeldeschluss,
-				'verfasser'				=> $verfasser
+				'id'				=> $_GET['id'],
+				'event_name' 		=> $titel,
+				'event_date' 		=> $event_date,
+				'event_deadline'	=> $event_deadline,
+				'event_author'		=> $event_author
 				); 
 	
 	e107::getEvent()->trigger("eventspost", $info);
@@ -294,25 +292,25 @@ if($_GET['action'] == "checkin") {
 		$user_id=USERID;
 	}
 	
-	$sql->select("events", "event_max_plaetze, event_anmeldeschluss", "id=" . $_GET['id']);
+	$sql->select("events", "event_max_places, event_deadline", "id=" . $_GET['id']);
 	$row = $sql->fetch();
-	$counter_akt = $sql->count("events_anmeldung", '(*)', "WHERE event_id=" . $_GET['id']);
+	$counter_akt = $sql->count("events_registration", '(*)', "WHERE event_id=" . $_GET['id']);
 	$meld=3;
 	
-	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
+	if ($row['event_deadline'] < time() and !check_class(e_UC_MAINADMIN)) {
 		$meld=2;
 	}
 
-	if ($counter_akt >= $row['event_max_plaetze'])	{
+	if ($counter_akt >= $row['event_max_places'])	{
 		$meld=1;
 	}
 	if ($meld==3) {
-		$result = $sql->select("events_anmeldung", "member_id, event_id", " member_id=" . $user_id . " AND event_id=" . $_GET['id'] . " ORDER BY id");
+		$result = $sql->select("events_registration", "member_id, event_id", " member_id=" . $user_id . " AND event_id=" . $_GET['id'] . " ORDER BY id");
 		// print_r ($result);
 		if ($result==0){ //nur hinzufügen wenn noch nicht vorhanden
 			$arr_insert['member_id']	= $user_id;
 			$arr_insert['event_id']		= $_GET['id'];
-			$result = $sql->insert("events_anmeldung",$arr_insert);
+			$result = $sql->insert("events_registration",$arr_insert);
 		}
 	}
 	$pos = strpos($_SERVER["HTTP_REFERER"], "?");
@@ -339,15 +337,15 @@ if($_GET['action'] == "checkout") {
 		$user_id=USERID;
 	}
 	$meld=5;
-	$sql->select("events", "event_anmeldeschluss", "id=" . $_GET['id']);
+	$sql->select("events", "event_deadline", "id=" . $_GET['id']);
 	$row = $sql->fetch();
 		
-	if ($row['event_anmeldeschluss'] < time() and !check_class(e_UC_MAINADMIN)) {
+	if ($row['event_deadline'] < time() and !check_class(e_UC_MAINADMIN)) {
 		$meld=4;
 	}
 	
 	if ($meld==5) {
-		$sql->delete('events_anmeldung', 'member_id = ' . $user_id . ' AND event_id = ' . $_GET['id']);
+		$sql->delete('events_registration', 'member_id = ' . $user_id . ' AND event_id = ' . $_GET['id']);
 	}
 	
 	$pos = strpos($_SERVER["HTTP_REFERER"], "?");

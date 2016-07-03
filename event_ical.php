@@ -8,9 +8,9 @@ if ($_GET['action']=="create") {
 	$sql->select("events", "*", "id=" . $_GET['id']);
 	$row = $sql->fetch();
 	$title		= $row['event_name'];
-	$details	= $row['event_details'];
-	$datumStart	= date("Ymd", $row['event_datum']);
-	$datumEnd 	= date("Ymd", $row['event_datum']+86400);
+	$event_details	= $row['event_details'];
+	$datumStart	= date("Ymd", $row['event_date']);
+	$datumEnd 	= date("Ymd", $row['event_date']+86400);
 	
 	$config    = array( "unique_id" => "whatyouwant.ch", "TZID" => "Europe/Zurich" );
 	$vcalendar = new vcalendar( $config );

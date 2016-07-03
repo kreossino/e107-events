@@ -11,7 +11,7 @@
 +---------------------------------------------------------------+
 */
 
-define("LAN_EVENT_01","Upcoming Events");
+define("LAN_EVENT_01","upcoming events");
 define("LAN_EVENT_02"," takes place at the ");
 define("LAN_EVENT_02a","");
 define("LAN_EVENT_03","click to show the event");
